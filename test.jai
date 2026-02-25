@@ -1,5 +1,4 @@
-#load "module.jai";
-
+#import,file "module.jai";
 #import "Basic";
 #import "Math";
 #import "Random";
@@ -36,13 +35,13 @@ print_err_stats :: (err: Error_Stats) {
     print("\n");
 }
 
-test_accuracy_cbrt_cube :: (gen_n_fn: () -> float64, cbrt_fn: (float64) -> float64) {
+test_accuracy_cbrt_cube :: (gen_n_fn: () -> float64, cbrt_fn: (float64) -> float64, desc: string) {
     err: Error_Stats;
     N_COUNT :: 100_000;
     for 1..N_COUNT {
         n := gen_n_fn();
 
-        n_cbrt_approx := cbrt(n);
+        n_cbrt_approx := cbrt_fn(n);
         n_approx := cube(n_cbrt_approx);
 
         abs_err := abs(n_approx - n);
@@ -50,24 +49,26 @@ test_accuracy_cbrt_cube :: (gen_n_fn: () -> float64, cbrt_fn: (float64) -> float
         add_err(*err, abs_err, rel_err);
     }
     compute_avg(*err);
-    print("Test accuracy cbrt -> cube -> compare");
+    print("Test accuracy cbrt -> cube -> compare\n");
+    print("Desc: %\n", desc);
     print_err_stats(err);
 }
 
-test_accuracy_cube_cbrt :: (gen_n_fn: () -> float64, cbrt_fn: (float64) -> float64) {
+test_accuracy_cube_cbrt :: (gen_n_fn: () -> float64, cbrt_fn: (float64) -> float64, desc: string) {
     err: Error_Stats;
     N_COUNT :: 100_000;
     for 1..N_COUNT {
         n := gen_n_fn();
         n_cube := cube(n);
-        n_approx := cbrt(n_cube);
+        n_approx := cbrt_fn(n_cube);
 
         abs_err := abs(n_approx - n);
         rel_err := abs_err / abs(n);
         add_err(*err, abs_err, rel_err);
     }
     compute_avg(*err);
-    print("Test accuracy cube -> cbrt -> compare");
+    print("Test accuracy cube -> cbrt -> compare\n");
+    print("Desc: %\n", desc);
     print_err_stats(err);
 }
 
@@ -84,9 +85,9 @@ cbrt_pow :: (x: float64) -> float64 {
 }
 
 main :: () {
-    test_accuracy_cbrt_cube(() -> float64 {return random_get_zero_to_one_new() * 10;}, cbrt);
-    test_accuracy_cbrt_cube(() -> float64 {return random_get_zero_to_one_new() * 10;}, cbrt_pow);
+    test_accuracy_cbrt_cube(() -> float64 {return random_get_zero_to_one_new() * 10;}, cbrt, "Using cbrt function");
+    test_accuracy_cbrt_cube(() -> float64 {return random_get_zero_to_one_new() * 10;}, cbrt_pow, "Using pow function");
 
-    test_accuracy_cube_cbrt(() -> float64 {return random_get_zero_to_one_new() * 10;}, cbrt);
-    test_accuracy_cube_cbrt(() -> float64 {return random_get_zero_to_one_new() * 10;}, cbrt_pow);
+    test_accuracy_cube_cbrt(() -> float64 {return random_get_zero_to_one_new() * 10;}, cbrt, "Using cbrt function");
+    test_accuracy_cube_cbrt(() -> float64 {return random_get_zero_to_one_new() * 10;}, cbrt_pow, "Using pow function");
 }
